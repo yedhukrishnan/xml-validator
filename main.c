@@ -17,8 +17,17 @@ struct Token {
   char *value;
 };
 
-void print_blank_line() {
-  printf("\n");
+int is_alpha(char c) {
+  if((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_' || c == '-') {
+    return 1;
+  }
+  return 0;
+}
+
+void show_token(struct Token *token) {
+  printf("Token Type: %s\n", token->type);
+  printf("Token Value: %s\n", token->value);
+  printf("---\n");
 }
 
 /*
@@ -26,14 +35,12 @@ void print_blank_line() {
  */
 char *ANGLE_OPEN = "angle_open";
 char *ANGLE_CLOSE = "angle_close";
-char *DOUBLE_QUOTE_OPEN = "double_quote_open";
-char *DOUBLE_QUOTE_CLOSE = "double_quote_close";
-char *ATTRIBUTE_NAME = "attribute_name";
-char *ATTRIBUTE_VALUE = "attribute_value";
+char *DOUBLE_QUOTE = "double_quote";
+char *LITERAL = "literal";
 
 int main() {
-  int token_count = 0;
-  char c;                    // A single char in the file
+  int token_count = 0, char_seen = 0, lit_counter;
+  char c, literal[100];
   struct Token *token[1000]; // Token array
 
   /*
@@ -42,36 +49,70 @@ int main() {
    */
   FILE *xml_file = fopen("sample.xml", "r");
 
+  lit_counter = 0;
+
   while((c = getc(xml_file)) != EOF) {
+    /*
+     * Check if we are iterating through string.
+     * If yes, check if the next char is an alphabet.
+     * If yes, continue updating the string, else terminate the string and
+     * create a literal token.
+     */
+    if(char_seen == 1) {
+      if(is_alpha(c) == 1) {
+        literal[lit_counter++] = c;
+        continue;
+      } else {
+        literal[lit_counter] = '\0';
+        token[token_count] = malloc(sizeof(struct Token));
+
+        token[token_count]->type = LITERAL;
+        token[token_count]->value = literal;
+        show_token(token[token_count]);
+        char_seen = 0;
+        lit_counter = 0;
+        token_count++;
+      }
+    }
+
     token[token_count] = malloc(sizeof(struct Token));
+
     switch(c) {
-      case '<':
-        token[token_count]->type = ANGLE_OPEN;
-        token[token_count]->value = "<";
-
-        printf("ANGLE_OPEN");
-        print_blank_line();
-
-        break;
-      case '>':
-        token[token_count]->type = ANGLE_CLOSE;
-        token[token_count]->value = ">";
-
-        printf("ANGLE_CLOSE");
-        print_blank_line();
-
-        break;
       case ' ':
       case '\t':
       case '\n':
         break;
+      case '<':
+        token[token_count]->type = ANGLE_OPEN;
+        token[token_count]->value = "<";
+        show_token(token[token_count]);
+        break;
+      case '>':
+        token[token_count]->type = ANGLE_CLOSE;
+        token[token_count]->value = ">";
+        show_token(token[token_count]);
+        break;
+      case '\"':
+        token[token_count]->type = DOUBLE_QUOTE;
+        token[token_count]->value = "\"";
+        show_token(token[token_count]);
+        break;
+      default:
+        if(is_alpha(c) == 1) {
+          char_seen = 1;
+          lit_counter = 0;
+          literal[lit_counter++] = c;
+          goto end_of_switch;
+        }
+        break;
     }
 
     token_count++;
-  }
 
-  printf("%i", token_count);
-  printf("%s", ANGLE_OPEN);
+    end_of_switch:
+
+    continue;
+  }
 
   return 0;
 }
