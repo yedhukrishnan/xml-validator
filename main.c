@@ -102,16 +102,11 @@ int main() {
           char_seen = 1;
           lit_counter = 0;
           literal[lit_counter++] = c;
-          goto end_of_switch;
         }
         break;
     }
 
     token_count++;
-
-    end_of_switch:
-
-    continue;
   }
 
   return 0;
