@@ -1,4 +1,5 @@
-# xml-validator
+XML Validator
+=============
 
 [work-in-progress]
 
