@@ -11,3 +11,4 @@ I'm using Lex and Yacc for tokenizing and parsing the XML. I'll be eventually ma
 - [ ] Create grammar rules for parsing XML syntax
 - [ ] Parser for XML
 - [ ] Wiki page for tutorial
+- [ ] Implementation in Lex and Yacc
